@@ -3,9 +3,9 @@ package CardGiverService
 import (
 	"context"
 	"errors"
+	"github.com/DaniilOr/webGo/pkg/card"
 	"log"
 	"sync"
-	"webService/pkg/card"
 )
 var (
 	errWrongType = errors.New("Wrong card type")

@@ -2,11 +2,12 @@ package app
 
 import (
 	"encoding/json"
+	"github.com/DaniilOr/webGo/cmd/bank/app/dto"
+	"github.com/DaniilOr/webGo/pkg/CardGiverService"
 	"log"
 	"net/http"
 	"strconv"
-	"webService/cmd/bank/app/dto"
-	"webService/pkg/CardGiverService"
+
 )
 
 type Server struct {

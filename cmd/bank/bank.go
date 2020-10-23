@@ -1,12 +1,12 @@
 package main
 
 import (
+	"github.com/DaniilOr/webGo/cmd/bank/app"
+	"github.com/DaniilOr/webGo/pkg/CardGiverService"
 	"log"
 	"net"
 	"net/http"
 	"os"
-	"webService/cmd/bank/app"
-	"webService/pkg/CardGiverService"
 )
 
 const defaultPort = "8888"
