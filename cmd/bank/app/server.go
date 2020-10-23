@@ -37,6 +37,7 @@ func (s *Server) getCards(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		cards := s.cardSvc.GetAll(r.Context())
+		log.Println(cards)
 		dtos := make([]*dto.CardDTO, len(cards))
 		for i, c := range cards {
 			if c.OwnerId == uid {
@@ -48,8 +49,13 @@ func (s *Server) getCards(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
-
-		makeResponse(dtos, w, r)
+		respBody, err := json.Marshal(dtos)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		makeResponse(respBody, w, r)
 	}
 }
 
@@ -60,28 +66,36 @@ func (s *Server) addCard(w http.ResponseWriter, r *http.Request) {
 	}
 	issuer := r.PostForm.Get("issuer")
 	cardType := r.PostForm.Get("type")
-	suid := r.URL.Query().Get("uid")
+	suid := r.PostForm.Get("uid")
 	if suid != "" {
 		uid, err := strconv.ParseInt(suid, 10, 64)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		s.cardSvc.IsueCard(uid, issuer, cardType, r.Context())
+		err = s.cardSvc.IsueCard(uid, issuer, cardType, r.Context())
+		var result dto.Result
+		if err != nil{
+			result = dto.Result{Result: "Error"}
+
+
+		} else {
+			result = dto.Result{Result: "Ok"}
+			makeResponse([]byte("Ok"), w, r)
+		}
+		response, err := json.Marshal(result)
+		if err != nil{
+			log.Println(err)
+			return
+		}
+		makeResponse(response, w, r)
 	}
 
 }
 
-func makeResponse(dtos []*dto.CardDTO, w http.ResponseWriter, r*http.Request) {
-	respBody, err := json.Marshal(dtos)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
+func makeResponse(respBody []byte, w http.ResponseWriter, r*http.Request) {
 	w.Header().Add("Content-Type", "application/json")
-	_, err = w.Write(respBody)
+	_, err := w.Write(respBody)
 	if err != nil {
 		log.Println(err)
 	}

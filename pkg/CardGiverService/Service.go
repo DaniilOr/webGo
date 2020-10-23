@@ -10,6 +10,7 @@ import (
 var (
 	errWrongType = errors.New("Wrong card type")
 	errNoKey = errors.New("No key in request")
+	errNoSuchUser = errors.New("No such user")
 )
 type Service struct{
 	Cards []*card.Card
@@ -18,15 +19,14 @@ type Service struct{
 }
 
 func CreateService() *Service{
-	return &Service{MaxId: 0, mu: sync.RWMutex{}}
+	s := Service{MaxId: 1, mu: sync.RWMutex{}, Cards: []*card.Card{&card.Card{OwnerId: 5, Number: "789"}}}
+	return &s
 }
 
-func (s *Service) IsueCard (uid int64, issuer string, cardType string, ctx context.Context) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+func (s *Service) IsueCard (uid int64, issuer string, cardType string, ctx context.Context) error {
 	if(cardType != "Virtual" && cardType != "Real"){
 		log.Println(errWrongType)
-		return
+		return errWrongType
 	}
 	number := string(s.MaxId)
 	cards := s.GetAll(ctx)
@@ -37,9 +37,12 @@ func (s *Service) IsueCard (uid int64, issuer string, cardType string, ctx conte
 	if found {
 		c := card.Card{Id: s.MaxId, Type: cardType, Issuer: issuer, OwnerId: uid, Number: "000" + number}
 		s.Cards = append(s.Cards, &c)
+		log.Println(c)
+		log.Println(s.Cards)
 		s.MaxId = s.MaxId + 1
+		return nil
 	}
-	return
+	return errNoSuchUser
 }
 
 func (s * Service) GetAll(ctx context.Context) []*card.Card{

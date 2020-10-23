@@ -6,3 +6,6 @@ type CardDTO struct {
 	Type string `json:"type"`
 	Number string `json:"number"`
 }
+ type Result struct{
+ 	Result string `json:"result"`
+ }

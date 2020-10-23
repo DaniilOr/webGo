@@ -1,0 +1,17 @@
+###
+GET http://0.0.0.0:8888/getCards?uid=5 HTTP/1.1
+
+###
+POST http://0.0.0.0:8888/addCard HTTP/1.1
+Accept: text/plain
+Content-Type: application/x-www-form-urlencoded
+
+uid=5&issuer=Visa&type=Real
+###
+GET http://0.0.0.0:8888/getCards?uid=5 HTTP/1.1
+###
+POST http://0.0.0.0:8888/addCard HTTP/1.1
+Accept: text/plain
+Content-Type: application/x-www-form-urlencoded
+
+uid=8&issuer=Visa&type=Real
