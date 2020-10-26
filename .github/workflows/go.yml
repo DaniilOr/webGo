@@ -30,3 +30,20 @@ jobs:
 
       - name: Test
         run: go test -v ./...
+
+      - name: Build binary for docker image
+        run: go build -v -o bank ./cmd/bank
+        env:
+          CGO_ENABLED: 0
+
+      - name: List
+        run: ls -la
+
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: daniilor/webgo/bank
+          tag_with_ref: true
