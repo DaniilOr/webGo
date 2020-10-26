@@ -38,9 +38,11 @@ func (s *Server) getCards(w http.ResponseWriter, r *http.Request) {
 		}
 		cards := s.cardSvc.GetAll(r.Context())
 		log.Println(cards)
+		found := false
 		dtos := make([]*dto.CardDTO, len(cards))
 		for i, c := range cards {
 			if c.OwnerId == uid {
+				found = true
 				dtos[i] = &dto.CardDTO{
 					Id:      c.Id,
 					Number:  c.Number,
@@ -48,6 +50,17 @@ func (s *Server) getCards(w http.ResponseWriter, r *http.Request) {
 					Type: c.Type,
 				}
 			}
+		}
+		if !found {
+			response := dto.Result{Result: "No cards"}
+			respBody, err := json.Marshal(response)
+			if err != nil {
+				log.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			makeResponse(respBody, w, r)
+			return
 		}
 		respBody, err := json.Marshal(dtos)
 		if err != nil {

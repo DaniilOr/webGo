@@ -3,8 +3,10 @@ package CardGiverService
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/DaniilOr/webGo/pkg/card"
 	"log"
+	"strconv"
 	"sync"
 )
 var (
@@ -13,13 +15,13 @@ var (
 	errNoSuchUser = errors.New("No such user")
 )
 type Service struct{
-	Cards []*card.Card
-	MaxId int64
+	cards []*card.Card
+	maxId int64
 	mu sync.RWMutex
 }
 
 func CreateService() *Service{
-	s := Service{MaxId: 1, mu: sync.RWMutex{}, Cards: []*card.Card{&card.Card{OwnerId: 5, Number: "789"}}}
+	s := Service{maxId: 1, mu: sync.RWMutex{}, cards: []*card.Card{&card.Card{OwnerId: 5, Number: "789"}}}
 	return &s
 }
 
@@ -28,18 +30,18 @@ func (s *Service) IsueCard (uid int64, issuer string, cardType string, ctx conte
 		log.Println(errWrongType)
 		return errWrongType
 	}
-	number := string(s.MaxId)
+	number := strconv.Itoa(int(s.maxId))
 	cards := s.GetAll(ctx)
 	found := false
 	for _, c := range cards{
 		found = found || (c.OwnerId == uid)
 	}
 	if found {
-		c := card.Card{Id: s.MaxId, Type: cardType, Issuer: issuer, OwnerId: uid, Number: "000" + number}
-		s.Cards = append(s.Cards, &c)
-		log.Println(c)
-		log.Println(s.Cards)
-		s.MaxId = s.MaxId + 1
+		c := card.Card{Id: s.maxId, Type: cardType, Issuer: issuer, OwnerId: uid, Number: fmt.Sprintf("%s%s", "000", number)}
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		s.cards = append(s.cards, &c)
+		s.maxId = s.maxId + 1
 		return nil
 	}
 	return errNoSuchUser
@@ -48,5 +50,5 @@ func (s *Service) IsueCard (uid int64, issuer string, cardType string, ctx conte
 func (s * Service) GetAll(ctx context.Context) []*card.Card{
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return s.Cards
+	return s.cards
 }
