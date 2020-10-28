@@ -8,4 +8,5 @@ type CardDTO struct {
 }
  type Result struct{
  	Result string `json:"result"`
+ 	ErrorDescription string `json:"errorDesc,omitempty"`
  }
